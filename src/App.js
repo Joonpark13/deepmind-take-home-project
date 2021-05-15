@@ -1,11 +1,14 @@
-import { AppBar, Box, CircularProgress, Divider, List, ListItem, ListItemText, Toolbar, Typography } from '@material-ui/core';
+import { useState } from 'react';
+import { AppBar, Box, CircularProgress, Divider, List, ListItem, ListItemText, TextField, Toolbar, Typography } from '@material-ui/core';
 import { AgentsApi } from './agents-api';
 import { useAgents } from './hooks';
+import ListMessage from './ListMessage';
 
 const api = new AgentsApi();
 
 function App() {
-  const [agents, isLoading, error] = useAgents(api);
+  const [searchInput, setSearchInput] = useState('');
+  const [agents, isLoading, error] = useAgents(api, searchInput);
 
   return (
     <div>
@@ -20,6 +23,16 @@ function App() {
           <Box padding={2}>
             <Typography variant="h6">AI Agents</Typography>
           </Box>
+
+          <Box paddingX={2} paddingBottom={2}>
+            <TextField
+              label="Search" 
+              value={searchInput}
+              onChange={event => setSearchInput(event.target.value)}
+              variant="outlined"
+              fullWidth
+            />
+          </Box>
           <Divider />
 
           <Box width={320}>
@@ -29,22 +42,27 @@ function App() {
               </Box>
             )}
             {error && (
-              <Box padding={1}>
-                <Typography variant="body1">
-                  There was an error loading the agents. Please try reloading.
-                </Typography>
-              </Box>
+              <ListMessage>
+                There was an error loading the agents. Please try reloading.
+              </ListMessage>
             )}
-            <List>
-              {agents.map(agent => (
-                <ListItem
-                  key={agent.id}
-                  button
-                >
-                  <ListItemText primary={agent.name} />
-                </ListItem>
-              ))}
-            </List>
+            {!isLoading && !error && agents.length === 0 && (
+              <ListMessage>
+                No matches found.
+              </ListMessage>
+            )}
+            {!isLoading && !error && agents.length > 0 && (
+              <List>
+                {agents.map(agent => (
+                  <ListItem
+                    key={agent.id}
+                    button
+                  >
+                    <ListItemText primary={agent.name} />
+                  </ListItem>
+                ))}
+              </List>
+            )}
           </Box>
         </div>
       </Box>

@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 
-export function useAgents(agentsApi) {
+export function useAgents(agentsApi, searchInput) {
   const [agents, setAgents] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState(null);
@@ -9,8 +9,14 @@ export function useAgents(agentsApi) {
     (async () => {
       if (agentsApi) {
         setIsLoading(true);
+        setError(null);
         try {
-          const response = await agentsApi.listAgents();
+          let response;
+          if (searchInput) {
+            response = await agentsApi.searchAgents(searchInput);
+          } else {
+            response = await agentsApi.listAgents();
+          }
           setAgents(response);
         } catch(err) {
           setError(err);
@@ -18,7 +24,7 @@ export function useAgents(agentsApi) {
         setIsLoading(false);
       }
     })();
-  }, [agentsApi]);
+  }, [agentsApi, searchInput]);
 
   return [agents, isLoading, error];
 }
