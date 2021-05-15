@@ -1,11 +1,13 @@
 import { Box, Typography } from "@material-ui/core";
+import DisplayContainer from './DisplayContainer';
 import TaskScoreCard from './TaskScoreCard';
+import { getTaskAveragesByCategory } from './util';
 
 export default function AgentDisplay({ agent }) {
   const taskAverages = getTaskAveragesByCategory(agent.tasks);
 
   return (
-    <Box padding={3} maxWidth={1200} width="100%" margin="auto">
+    <DisplayContainer>
       <Typography variant="h4" component="h3" gutterBottom>{agent.name}</Typography>
       <Typography variant="subtitle1">{agent.description}</Typography>
 
@@ -14,27 +16,6 @@ export default function AgentDisplay({ agent }) {
           <TaskScoreCard key={taskCategory} categoryName={taskCategory} score={score} />
         ))}
       </Box>
-    </Box>
+    </DisplayContainer>
   );
-}
-
-function getTaskAveragesByCategory(tasks) {
-  const tasksByCategory = {};
-  tasks.forEach(task => {
-    if (tasksByCategory.hasOwnProperty(task.category)) {
-      tasksByCategory[task.category].push(task);
-    } else {
-      tasksByCategory[task.category] = [task];
-    }
-  });
-
-  const taskAverages = {};
-  Object.keys(tasksByCategory).forEach(category => {
-    taskAverages[category] = average(tasksByCategory[category].map(task => task.score));
-  });
-  return taskAverages;
-}
-
-function average(numbers) {
-  return numbers.reduce((a, b) => a + b, 0) / numbers.length;
 }

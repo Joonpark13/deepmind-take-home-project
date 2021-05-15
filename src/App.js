@@ -4,6 +4,7 @@ import { AgentsApi } from './agents-api';
 import { useAgents } from './hooks';
 import ListMessage from './ListMessage';
 import AgentDisplay from './AgentDisplay';
+import AgentComparisonDisplay from './AgentComparisonDisplay';
 
 const api = new AgentsApi();
 
@@ -108,6 +109,9 @@ function App() {
 
         {!compareMode && selectedAgentIds.size === 1 && (
           <AgentDisplay agent={agents.find(agent => agent.id === onlySelectedAgentId)} />
+        )}
+        {compareMode && selectedAgentIds.size >= 1 && (
+          <AgentComparisonDisplay agents={agents.filter(agent => selectedAgentIds.has(agent.id))} />
         )}
       </Box>
     </div>

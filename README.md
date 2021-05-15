@@ -8,3 +8,5 @@ To run the app locally:
 yarn
 yarn start
 ```
+
+(Must have node and yarn installed)
