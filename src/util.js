@@ -18,3 +18,7 @@ export function getTaskAveragesByCategory(tasks) {
 function average(numbers) {
   return numbers.reduce((a, b) => a + b, 0) / numbers.length;
 }
+
+export function getOnlySelectedAgentId(selectedAgentIds) {
+  return selectedAgentIds.values().next().value;
+}

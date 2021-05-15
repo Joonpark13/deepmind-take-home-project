@@ -4,20 +4,7 @@ import TaskScoreComparisonCard from './TaskScoreComparisonCard';
 import { getTaskAveragesByCategory } from './util';
 
 export default function AgentComparisonDisplay({ agents }) {
-  const categoryScoresByAgent = {};
-  const tasks = new Set();
-  agents.forEach(agent => {
-    const averagesByCategory = getTaskAveragesByCategory(agent.tasks);
-    categoryScoresByAgent[agent.id] = averagesByCategory;
-    Object.keys(averagesByCategory).forEach(category => tasks.add(category));
-  });
-  const agentScoresByCategory = {};
-  tasks.forEach(task => {
-    agentScoresByCategory[task] = {};
-    Object.entries(categoryScoresByAgent).forEach(([agentId, categoryScores]) => {
-      agentScoresByCategory[task][agentId] = categoryScores[task];
-    });
-  });
+  const agentScoresByCategory = getAgentScoresByCategory(agents);
 
   return (
     <DisplayContainer>
@@ -39,4 +26,23 @@ export default function AgentComparisonDisplay({ agents }) {
       </Box>
     </DisplayContainer>
   );
+}
+
+function getAgentScoresByCategory(agents) {
+  const categoryScoresByAgent = {};
+  const tasks = new Set();
+  agents.forEach(agent => {
+    const averagesByCategory = getTaskAveragesByCategory(agent.tasks);
+    categoryScoresByAgent[agent.id] = averagesByCategory;
+    Object.keys(averagesByCategory).forEach(category => tasks.add(category));
+  });
+
+  const agentScoresByCategory = {};
+  tasks.forEach(task => {
+    agentScoresByCategory[task] = {};
+    Object.entries(categoryScoresByAgent).forEach(([agentId, categoryScores]) => {
+      agentScoresByCategory[task][agentId] = categoryScores[task];
+    });
+  });
+  return agentScoresByCategory;
 }

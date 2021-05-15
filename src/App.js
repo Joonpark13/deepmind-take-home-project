@@ -1,10 +1,12 @@
 import { useState } from 'react';
-import { AppBar, Box, Checkbox, CircularProgress, Divider, FormControlLabel, FormGroup, List, ListItem, ListItemIcon, ListItemText, Switch, TextField, Toolbar, Typography } from '@material-ui/core';
-import { AgentsApi } from './agents-api';
-import { useAgents } from './hooks';
+import { AppBar, Box, CircularProgress, Divider, FormControlLabel, FormGroup, Switch, TextField, Toolbar, Typography } from '@material-ui/core';
 import ListMessage from './ListMessage';
 import AgentDisplay from './AgentDisplay';
 import AgentComparisonDisplay from './AgentComparisonDisplay';
+import AgentsList from './AgentsList';
+import { AgentsApi } from './agents-api';
+import { useAgents } from './hooks';
+import { getOnlySelectedAgentId } from './util';
 
 const api = new AgentsApi();
 
@@ -14,24 +16,12 @@ function App() {
   const [agents, isLoading, error] = useAgents(api, searchInput, () => setSelectedAgentIds(new Set()));
   const [compareMode, setCompareMode] = useState(false);
 
-  function handleAgentClick(agentId) {
-    if (!compareMode) {
-      setSelectedAgentIds(new Set([agentId]));
-    } else if (selectedAgentIds.has(agentId)) {
-      // Must initialize a new set to give React a new reference, otherwise React will not rerender.
-      setSelectedAgentIds(removeFromSetAndGetNewSet(selectedAgentIds, agentId));
-    } else {
-      // Must initialize a new set to give React a new reference, otherwise React will not rerender.
-      setSelectedAgentIds(addToSetAndGetNewSet(selectedAgentIds, agentId));
-    }
-  }
-
   function handleCompareModeChange() {
     setSelectedAgentIds(new Set());
     setCompareMode(!compareMode);
   }
 
-  const onlySelectedAgentId = selectedAgentIds.values().next().value;
+  const onlySelectedAgentId = getOnlySelectedAgentId(selectedAgentIds);
 
   return (
     <div>
@@ -81,28 +71,12 @@ function App() {
               </ListMessage>
             )}
             {!isLoading && !error && agents.length > 0 && (
-              <List>
-                {agents.map(agent => (
-                  <ListItem
-                    key={agent.id}
-                    button
-                    dense={compareMode}
-                    selected={selectedAgentIds.size === 1 && onlySelectedAgentId === agent.id}
-                    onClick={() => handleAgentClick(agent.id)}
-                  >
-                    {compareMode && (
-                      <ListItemIcon>
-                        <Checkbox
-                          edge="start"
-                          checked={selectedAgentIds.has(agent.id)}
-                          disableRipple
-                        />
-                      </ListItemIcon>
-                    )}
-                    <ListItemText primary={agent.name} />
-                  </ListItem>
-                ))}
-              </List>
+              <AgentsList
+                agents={agents}
+                compareMode={compareMode}
+                selectedAgentIds={selectedAgentIds}
+                setSelectedAgentIds={setSelectedAgentIds}
+              />
             )}
           </Box>
         </div>
@@ -116,14 +90,6 @@ function App() {
       </Box>
     </div>
   );
-}
-
-function removeFromSetAndGetNewSet(set, value) {
-  return new Set([...set].filter(setValue => setValue !== value));
-}
-
-function addToSetAndGetNewSet(set, value) {
-  return new Set(set.add(value))
 }
 
 export default App;
