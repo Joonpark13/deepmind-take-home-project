@@ -3,12 +3,21 @@ import { AppBar, Box, CircularProgress, Divider, List, ListItem, ListItemText, T
 import { AgentsApi } from './agents-api';
 import { useAgents } from './hooks';
 import ListMessage from './ListMessage';
+import AgentDisplay from './AgentDisplay';
 
 const api = new AgentsApi();
 
 function App() {
   const [searchInput, setSearchInput] = useState('');
-  const [agents, isLoading, error] = useAgents(api, searchInput);
+  const [selectedAgentIds, setSelectedAgentIds] = useState([]);
+  const [agents, isLoading, error] = useAgents(api, searchInput, () => setSelectedAgentIds([]));
+  const [compareMode, setCompareMode] = useState(false);
+
+  function handleAgentClick(agentId) {
+    if (!compareMode) {
+      setSelectedAgentIds([agentId]);
+    }
+  }
 
   return (
     <div>
@@ -21,7 +30,7 @@ function App() {
       <Box display="flex">
         <div>
           <Box padding={2}>
-            <Typography variant="h6">AI Agents</Typography>
+            <Typography variant="h6" component="h2">AI Agents</Typography>
           </Box>
 
           <Box paddingX={2} paddingBottom={2}>
@@ -57,6 +66,8 @@ function App() {
                   <ListItem
                     key={agent.id}
                     button
+                    selected={selectedAgentIds.length === 1 && selectedAgentIds[0] === agent.id}
+                    onClick={() => handleAgentClick(agent.id)}
                   >
                     <ListItemText primary={agent.name} />
                   </ListItem>
@@ -65,6 +76,10 @@ function App() {
             )}
           </Box>
         </div>
+
+        {selectedAgentIds.length === 1 && (
+          <AgentDisplay agent={agents.find(agent => agent.id === selectedAgentIds[0])} />
+        )}
       </Box>
     </div>
   );

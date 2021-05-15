@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 
-export function useAgents(agentsApi, searchInput) {
+export function useAgents(agentsApi, searchInput, callback) {
   const [agents, setAgents] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState(null);
@@ -8,6 +8,7 @@ export function useAgents(agentsApi, searchInput) {
   useEffect(() => {
     (async () => {
       if (agentsApi) {
+        callback();
         setIsLoading(true);
         setError(null);
         try {
