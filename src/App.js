@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { AppBar, Box, CircularProgress, Divider, List, ListItem, ListItemText, TextField, Toolbar, Typography } from '@material-ui/core';
+import { AppBar, Box, Checkbox, CircularProgress, Divider, FormControlLabel, FormGroup, List, ListItem, ListItemIcon, ListItemText, Switch, TextField, Toolbar, Typography } from '@material-ui/core';
 import { AgentsApi } from './agents-api';
 import { useAgents } from './hooks';
 import ListMessage from './ListMessage';
@@ -9,15 +9,28 @@ const api = new AgentsApi();
 
 function App() {
   const [searchInput, setSearchInput] = useState('');
-  const [selectedAgentIds, setSelectedAgentIds] = useState([]);
-  const [agents, isLoading, error] = useAgents(api, searchInput, () => setSelectedAgentIds([]));
+  const [selectedAgentIds, setSelectedAgentIds] = useState(new Set());
+  const [agents, isLoading, error] = useAgents(api, searchInput, () => setSelectedAgentIds(new Set()));
   const [compareMode, setCompareMode] = useState(false);
 
   function handleAgentClick(agentId) {
     if (!compareMode) {
-      setSelectedAgentIds([agentId]);
+      setSelectedAgentIds(new Set([agentId]));
+    } else if (selectedAgentIds.has(agentId)) {
+      // Must initialize a new set to give React a new reference, otherwise React will not rerender.
+      setSelectedAgentIds(removeFromSetAndGetNewSet(selectedAgentIds, agentId));
+    } else {
+      // Must initialize a new set to give React a new reference, otherwise React will not rerender.
+      setSelectedAgentIds(addToSetAndGetNewSet(selectedAgentIds, agentId));
     }
   }
+
+  function handleCompareModeChange() {
+    setSelectedAgentIds(new Set());
+    setCompareMode(!compareMode);
+  }
+
+  const onlySelectedAgentId = selectedAgentIds.values().next().value;
 
   return (
     <div>
@@ -29,8 +42,14 @@ function App() {
 
       <Box display="flex">
         <div>
-          <Box padding={2}>
+          <Box padding={2} display="flex" justifyContent="space-between" alignItems="center">
             <Typography variant="h6" component="h2">AI Agents</Typography>
+            <FormGroup>
+              <FormControlLabel
+                control={<Switch checked={compareMode} onChange={handleCompareModeChange} />}
+                label="Compare"
+              />
+            </FormGroup>
           </Box>
 
           <Box paddingX={2} paddingBottom={2}>
@@ -66,9 +85,19 @@ function App() {
                   <ListItem
                     key={agent.id}
                     button
-                    selected={selectedAgentIds.length === 1 && selectedAgentIds[0] === agent.id}
+                    dense={compareMode}
+                    selected={selectedAgentIds.size === 1 && onlySelectedAgentId === agent.id}
                     onClick={() => handleAgentClick(agent.id)}
                   >
+                    {compareMode && (
+                      <ListItemIcon>
+                        <Checkbox
+                          edge="start"
+                          checked={selectedAgentIds.has(agent.id)}
+                          disableRipple
+                        />
+                      </ListItemIcon>
+                    )}
                     <ListItemText primary={agent.name} />
                   </ListItem>
                 ))}
@@ -77,12 +106,20 @@ function App() {
           </Box>
         </div>
 
-        {selectedAgentIds.length === 1 && (
-          <AgentDisplay agent={agents.find(agent => agent.id === selectedAgentIds[0])} />
+        {!compareMode && selectedAgentIds.size === 1 && (
+          <AgentDisplay agent={agents.find(agent => agent.id === onlySelectedAgentId)} />
         )}
       </Box>
     </div>
   );
+}
+
+function removeFromSetAndGetNewSet(set, value) {
+  return new Set([...set].filter(setValue => setValue !== value));
+}
+
+function addToSetAndGetNewSet(set, value) {
+  return new Set(set.add(value))
 }
 
 export default App;

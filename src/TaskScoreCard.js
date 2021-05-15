@@ -9,7 +9,7 @@ export default function TaskScoreCard({ categoryName, score }) {
         <Typography variant="h6" gutterBottom>{categoryName}</Typography>
 
         <div className={`c100 p${Math.round(score)} green`}>
-          <span className="task-score">{score}%</span>
+          <span className="task-score">{Math.round(score)}%</span>
           <div className="slice">
               <div className="bar"></div>
               <div className="fill"></div>

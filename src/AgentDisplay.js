@@ -11,7 +11,7 @@ export default function AgentDisplay({ agent }) {
 
       <Box display="flex" padding={3} justifyContent="space-around">
         {Object.entries(taskAverages).map(([taskCategory, score]) => (
-          <TaskScoreCard key={taskCategory} categoryName={taskCategory} score={Math.round(score)} />
+          <TaskScoreCard key={taskCategory} categoryName={taskCategory} score={score} />
         ))}
       </Box>
     </Box>
